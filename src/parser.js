@@ -158,10 +158,12 @@ class Parser {
     }
 
     // If not a special tag, treat as description
-    const descMatch = line.match(patterns.docLine);
+    const descMatch = lineTrimmed.match(patterns.docLine);
     if (descMatch && descMatch[1]) {
       func.description.push(descMatch[1]);
       return ;
+    } else {
+      func.description.push("");
     }
   }
 
