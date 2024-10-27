@@ -40,12 +40,12 @@ class GludocGenerator {
 
   async loadConfig() {
     let config = null;
+    const logger = new Logger(this.name);
 
     try {
       const configPath = path.join(this.workspaceRoot, '.vscode', 'gludoc.json');
       const configData = await fs.readFile(configPath, 'utf8');
       config = JSON.parse(configData);
-    // eslint-disable-next-line no-unused-vars
     } catch (e) {
       config = {
         excludePatterns: ['**/test/**', '**/spec/**'],
@@ -53,6 +53,7 @@ class GludocGenerator {
         outputFormat: 'markdown',
         outputPath: 'wiki',
       };
+      logger.error(`Failed to load config: ${e.stack}`);
     }
 
     config.workspaceRoot = this.workspaceRoot;
@@ -129,7 +130,7 @@ async function activate(context) {
           }
         } catch (err) {
           errorCount++;
-          logger.error(`Failed to generate docs for module \`${moduleName}\`: ${err.message}`);
+          logger.error(`Failed to generate docs for module \`${moduleName}\`: ${err.stack}`);
         }
       }
 
@@ -140,7 +141,7 @@ async function activate(context) {
         // logger.debug(`Documentation written to ${config.outputPath}`);
       }
     } catch (e) {
-      vscode.window.showErrorMessage(`Error generating documentation: ${e.message}`);
+      vscode.window.showErrorMessage(`Error generating documentation: ${e.stack}`);
     }
 
   });

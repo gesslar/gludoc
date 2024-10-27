@@ -59,18 +59,14 @@ Anything that doesn't match a supported tag is treated as a description.
 
 This extension contributes the following to the VSCode command palette:
 
-- `[Gludoc] Generate Lua Documentation`: Generates documentation for the current
-  workspace.
+- `[Gludoc] Generate Lua Documentation from current workspace`: Generates
+  documentation for the current workspace.
 
 ## Release Notes
 
 ### 0.1.0
 
 Initial release of Gludoc.
-
-### 0.1.1
-
-Fixed issue with function descriptions not being generated.
 
 ---
 

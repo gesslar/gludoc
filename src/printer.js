@@ -1,7 +1,6 @@
 const fs = require("fs").promises;
 const path = require("path");
 const Logger = require("./logger");
-const assert = require("assert");
 
 class Printer {
   /**
@@ -85,7 +84,7 @@ class Printer {
       await fs.writeFile(outputPath, doc, "utf8");
       return true;
     } catch (e) {
-      this.logger.error(`Error writing markdown for \`${outputPath}\`: ${e}`);
+      this.logger.error(`Error writing markdown for \`${outputPath}\`: ${e.stack}`);
       throw e;
     }
   }
@@ -96,7 +95,7 @@ class Printer {
       const outputPath = path.resolve(this.config.workspaceRoot, this.config.outputPath);
       await fs.mkdir(outputPath, { recursive: true });
     } catch (e) {
-      this.logger.error(`Error creating output directory: ${e}`);
+      this.logger.error(`Error creating output directory: ${e.stack}`);
       throw e;
     }
   }
@@ -158,6 +157,9 @@ class Printer {
    * @param {function} f
    */
   generateDocBlock(func, property, label = null, f = null) {
+    if (!func[property])
+      return "";
+
     const render = (value, f) => {
       return Array.isArray(value)
         ? value.length > 0
