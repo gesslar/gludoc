@@ -10,7 +10,6 @@ class Func {
   param = [];
   return = null;
   description = [];
-  example = [];
 }
 
 class Parser {
@@ -35,39 +34,40 @@ class Parser {
   parse(content) {
     try {
       const lines = content.text.split(/\r?\n/);
-
       const funcs = {};
       let func = null;
 
-      for (let lineNum = 0; lineNum < lines.length; lineNum++) {
-        const line = lines[lineNum].trim();
+      lines.forEach(line => {
+        const lineTrimmed = line.trim();
 
-        if (!line)
-          continue;
+        // Skip empty lines unless we're processing a multiline tag, which
+        // might have them for formatting reasons.
+        if (!this.processingMultiline && !lineTrimmed.length)
+          return;
 
         // Check for start of doc comment block
-        if (this.isCommentStart(line)) {
-          func = this.newFunction(line);
-          continue;
+        if (this.isCommentStart(lineTrimmed)) {
+          func = this.newFunction(lineTrimmed);
+          return;
         }
 
         // Process documentation lines
         if (this.processingComment) {
-          if (!line.startsWith('---')) {
+          if (!lineTrimmed.startsWith('---')) {
             // End of comment block, look for function definition
-            if (this.isFunctionDefinition(line)) {
-              const result = this.finalizeFunction(line, func);
+            if (this.isFunctionDefinition(lineTrimmed)) {
+              const result = this.finalizeFunction(lineTrimmed, func);
               if (result) {
                 funcs[result] = func;
               }
             }
             this.processingComment = false;
-            continue;
+            return;
           }
 
           this.processLine(line, func);
         }
-      }
+      });
 
       return funcs;
     } catch (e) {
@@ -76,22 +76,18 @@ class Parser {
   }
 
   /**
- * @param {string} line
- */
+   * @param {string} line
+   */
   isCommentStart(line) {
     // Only consider it a new doc block start if we're not already in a comment
     return !this.processingComment && patterns.docStart.test(line);
   }
 
-  inExample() {
-    return this.processingComment && this.processingMultiline
-  }
-
   /**
- * @param {string} line
- */
+   * @param {string} line
+   */
   newFunction(line) {
-    if (this.isCommentStart(line)) {
+    if (this.isCommentStart(line.trim())) {
       this._resetState();
 
       const func = new Func();
@@ -109,10 +105,12 @@ class Parser {
    * @param {Func} func
    */
   processLine(line, func) {
+    const lineTrimmed = line.trim();
+
     if (!func)
       throw new Error('No function context');
 
-    const paramMatch = line.match(patterns.param);
+    const paramMatch = lineTrimmed.match(patterns.param);
     if (paramMatch) {
       func.param.push({
         name: paramMatch[1],
@@ -123,7 +121,7 @@ class Parser {
     }
 
     // Is this a return statement?
-    const returnMatch = line.match(patterns.return);
+    const returnMatch = lineTrimmed.match(patterns.return);
     if (returnMatch) {
       func.return = [{
         type: returnMatch[1],
@@ -133,20 +131,30 @@ class Parser {
     }
 
     // Is this a multiline tag?
-    const multilineMatch = line.match(patterns.multilineTag);
-    if (multilineMatch && patterns.multiline.includes(multilineMatch[1])) {
+    const multilineMatch = lineTrimmed.match(patterns.multilineStart);
+    if (multilineMatch && patterns.multilineTags.includes(multilineMatch[1])) {
       const tag = multilineMatch[1];
       func[tag] = func[tag] || [];
-      func[tag].push(multilineMatch[2]);
+
+      // If there is text on the same line as the tag, add it to the tag
+      if (multilineMatch[2])
+        func[tag].push(multilineMatch[2]);
+
       this.processingMultiline = tag;
       return;
     }
 
     // If we are processing a multiline tag, add the line to the tag
-    const [currentTag, tagMatch] = [this.processingMultiline, line.match(patterns.docLine)];
-    if (currentTag && tagMatch && tagMatch[1]) {
-      func[currentTag].push(tagMatch[1]);
-      return;
+    const currentTag = this.processingMultiline;
+    if(currentTag) {
+      const tagMatch = lineTrimmed.match(patterns.multiLine);
+
+      if(tagMatch && tagMatch[1]) {
+        func[currentTag].push(tagMatch[1]);
+        return;
+      } else {
+        func[currentTag].push("");
+      }
     }
 
     // If not a special tag, treat as description

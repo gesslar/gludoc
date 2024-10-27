@@ -3,19 +3,20 @@ const patterns = {
   module: /^.*[\\\/](.*)\.lua$/,
 
   // Just look for any doc comment start
-  docStart: /^---\s*/,
+  docStart: /^--- /,
 
   // Doc line for content
-  docLine: /^---\s*(.*)/,
+  docLine: /^--- (.*)/,
+  multiLine: /^--- (.*)/,
 
   // Param and return patterns stay the same
   // Lines beginning with @ are doc lines
-  param: /^---\s*@param\s+(\w+)\s+([^\s-]+)\s*-?\s*(.*)/,
-  return: /^---\s*@return\s+([^\s-]+)\s*-?\s*(.*)/,
+  param: /^--- @param\s+(\w+)\s+([^\s-]+)\s*-?\s*(.*)/,
+  return: /^--- @return\s+([^\s-]+)\s*-?\s*(.*)/,
 
   // Multiline tag
-  multiline: ["example"],
-  multilineTag: /^(?:---\s*)?@(\w+)\s*(.*)/,
+  multilineTags: ["example"],
+  multilineStart: /^(?:--- *)?@(\w+)\s*(.*)/,
 
   // The actual function definition is our source of truth
   function: /^function +\w+\s*([:\.])\s*([\w_]+)\s*\((.*?)\)$/
