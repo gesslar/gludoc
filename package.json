@@ -1,0 +1,73 @@
+{
+  "name": "vscode-gludoc",
+  "displayName": "Glu Documentation Generator",
+  "description": "Generates documentation from Lua comments",
+  "icon": "assets/folder.png",
+  "version": "0.1.0",
+  "publisher": "gesslar",
+  "author": {
+    "name": "Gesslar",
+    "email": "karahd@gmail.com",
+    "url": "https://github.com/gesslar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gesslar/gludoc.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:lua"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-gludoc.generateDocs",
+        "title": "[Gludoc] Generate Lua Documentation"
+      }
+    ],
+    "configuration": {
+      "title": "Glu Documentation Generator",
+      "properties": {
+        "gludoc.outputPath": {
+          "type": "string",
+          "default": "docs",
+          "description": "Path of directory to output documentation files (relative to workspace root)."
+        },
+        "gludoc.printerOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Path and filename of a custom printer implementation (relative to workspace root) (Not implemented yet)."
+        },
+        "gludoc.parserOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Path and filename of a custom parser implementation (relative to workspace root) (Not implemented yet)."
+        },
+        "gludoc.readerOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Path and filename of a custom reader implementation (relative to workspace root) (Not implemented yet)."
+        },
+        "gludoc.patternsOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Path and filename of a custom patterns implementation (relative to workspace root) (Not implemented yet)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^16.0.0",
+    "eslint": "^8.47.0"
+  }
+}
