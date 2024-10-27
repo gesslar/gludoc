@@ -3,7 +3,7 @@
   "displayName": "Glu Documentation Generator",
   "description": "Generates documentation from Lua comments",
   "icon": "assets/folder.png",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "gesslar",
   "author": {
     "name": "Gesslar",

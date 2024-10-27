@@ -158,12 +158,6 @@ class Printer {
    * @param {function} f
    */
   generateDocBlock(func, property, label = null, f = null) {
-    assert(func[property], `No ${property} found for ${func.name}`);
-
-    let value = func[property];
-
-    assert(Array.isArray(value) || typeof value === "string", `Expected ${property} to be an array or string, got ${typeof value} for ${func.name}.\nGot: ${JSON.stringify(value)}`);
-
     const render = (value, f) => {
       return Array.isArray(value)
         ? value.length > 0
@@ -174,7 +168,7 @@ class Printer {
           : "";
     }
 
-    value = render(value, f);
+    const value = render(func[property], f);
 
     return value.length > 0
       ? `${label ? `**${label}**\n\n` : ""}${value}\n\n`
