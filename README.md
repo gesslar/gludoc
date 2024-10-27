@@ -46,8 +46,6 @@ Gludoc supports the following tags:
 
 Anything that doesn't match a supported tag is treated as a description.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
 ## Release Notes
 
 ### 0.1.0
