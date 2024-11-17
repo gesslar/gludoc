@@ -172,7 +172,7 @@ class Printer {
    * @param {Object} func
    */
   generateFunctionReturns(func) {
-    const f = ret => `\`${ret.type}\` - ${ret.description}`;
+    const f = ret => `\`${ret.types.join("`, `")}\` - ${ret.description}`;
 
     return this.generateDocBlock(func, "return", "Returns", f);
   }

@@ -172,8 +172,12 @@ class Parser {
     // Match @return tag
     const returnMatch = lineTrimmed.match(patterns.tags.return);
     if (returnMatch) {
+      const types = [];
+
+      // Split return types by comma
+      returnMatch[1].split(',').forEach((type) => { types.push(type.trim()); });
       func.return = [{
-        type: returnMatch[1],
+        types: types,
         description: returnMatch[2]
       }];
       return;
