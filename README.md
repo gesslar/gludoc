@@ -139,8 +139,11 @@ Initial release of Gludoc.
 Major update to Gludoc. Now supports `@name` for functionsd and @meta for
 describing the module name at the top of a file.
 
----
+### 1.0.0
 
+Adding license and also previously added support for multiple return values.
+
+---
 
 [Fromat icons created by PixelX - Flaticon](https://www.flaticon.com/free-icons/fromat)[^1]
 
