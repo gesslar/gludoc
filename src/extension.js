@@ -61,6 +61,21 @@ class GludocGenerator {
 
     return config;
   }
+
+  /**
+   * Determines if a file is documentation-only by checking for `---@meta` tag.
+   * @param {string} filePath
+   * @returns {Promise<boolean>}
+   */
+  async isDocumentationOnly(filePath) {
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      return content.trim().startsWith('---@meta');
+    } catch (e) {
+      console.error(`Error reading file ${filePath}: ${e.stack}`);
+      return false;
+    }
+  }
 }
 
 /**
@@ -80,70 +95,59 @@ async function activate(context) {
       const generator = new GludocGenerator(workspaceRoot);
       const config = await generator.loadConfig();
 
-      /**
-       * @param {string} filePath
-       */
-      function getModuleName(filePath) {
-        // logger.debug(`File path: \`${filePath}\``);
-        const matches = filePath.match(patterns.module);
-        // logger.debug(`Module name: \`${JSON.stringify(matches)}\``);
-        return matches[1];
-      }
-
+      const logger = new Logger(generator.name);
       const reader = new Reader(generator.name);
       const parser = new Parser(generator.name);
       const printer = new Printer(config);
-      const logger = new Logger(generator.name);
+
       // Find all Lua files in workspace
+      const sourcePath = vscode.workspace.getConfiguration().get('gludoc.sourcePath') || '**/*.lua';
       const files = await vscode.workspace.findFiles(
-        '**/*.lua',
+        sourcePath,
         `{${config.excludePatterns.join(',')}}`
       );
 
-      const modules = {}
+      /** @type {Object<string, Object>} */
+      const modules = {};
 
-      // logger.debug(`Found ${files.length} files: ${files.toString()}`);
-
-      // Parse each file
+      // Filter documentation-only files and parse them
       for (const file of files) {
-        const moduleName = getModuleName(file.fsPath);
-        // logger.debug(`Reading module: \`${moduleName}\``);
-        const content = await reader.read(file.fsPath);
-        // logger.debug(`Parsing module: \`${moduleName}\``);
-        const parsed = parser.parse(content);
-        modules[moduleName] = parsed;
-      }
+        if (await generator.isDocumentationOnly(file.fsPath)) {
+          const content = await reader.read(file.fsPath);
+          const parsedContent = parser.parse(content);
 
-      // Generate and save documentation for each module
-      for (const [moduleName, module] of Object.entries(modules)) {
-        // logger.debug(`Generating docs for module: \`${moduleName}\``);
+          modules[parsedContent.meta] = parsedContent.funcs;
+          // logger.debug(Object.keys(parsed));
+          // logger.debug(JSON.stringify(parsed));
 
-        try {
-          const doc = await printer.print({
-            name: moduleName,
-            module
-          });
+          // const { moduleName: meta, parsed: funcs } = parsedContent ;
 
-          if (doc) {
-            const outputPath = path.join(workspaceRoot, config.outputPath, `${moduleName}.md`);
-            await printer.writeMarkdown(outputPath, doc);
-          }
-        } catch (err) {
-          errorCount++;
-          logger.error(`Failed to generate docs for module \`${moduleName}\`: ${err.stack}`);
+          // const {moduleName: meta, parsed: funcs} = parser.parse(content);
+          // modules[meta] = funcs;
+          // logger.info(`Parsed documentation for module \`${moduleName}\``);
         }
       }
 
-      if (errorCount > 0) {
-        logger.info(`Documentation generated with ${errorCount} errors`);
-      } else {
-        logger.info('Documentation generated successfully');
-        // logger.debug(`Documentation written to ${config.outputPath}`);
+      // logger.debug(Object.keys(modules));
+
+      for (const [moduleName, module] of Object.entries(modules)) {
+        // logger.debug(`Generating documentation for module \`${moduleName}\``);
+
+        try {
+          const doc = printer.print({ name: moduleName, funcs: module });
+
+          if(doc) {
+            const outputPath = path.join(workspaceRoot, config.outputPath, `${moduleName}.md`);
+            await printer.writeMarkdown(outputPath, doc);
+          }
+        } catch(e) {
+          errorCount++;
+          logger.error(`Failed to generate docs for module \`${moduleName}\`: ${e.stack}`);
+        }
       }
     } catch (e) {
       vscode.window.showErrorMessage(`Error generating documentation: ${e.stack}`);
     }
-
   });
 
   context.subscriptions.push(disposable);

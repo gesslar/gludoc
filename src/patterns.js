@@ -3,23 +3,26 @@ const patterns = {
   module: /^.*[\\\/](.*)\.lua$/,
 
   // Just look for any doc comment start
-  docStart: /^--- /,
+  docStart: /^---\s?/,
 
   // Doc line for content
-  docLine: /^--- (.*)/,
-  multiLine: /^--- (.*)/,
+  docLine: /^\s*---\s?(.*)$/,
+  // multiLine: /^---\s?/,
 
-  // Param and return patterns stay the same
-  // Lines beginning with @ are doc lines
-  param: /^--- @param\s+(\w+)\s+([^\s-]+)\s*-?\s*(.*)/,
-  return: /^--- @return\s+([^\s-]+)\s*-?\s*(.*)/,
+  tags : {
+    class  : /^---\s?@class\s+(.*)/,                    // Class name
+    name   : /^---\s?@name\s+(.*)/,                     // Function name
+    param  : /^---\s?@param\s+([\w\.]*)\s+(.*)?\s+-\s+(.*)$/, // Function parameter
+    example: /^---\s?@example\s*/,                      // Example
+    meta   : /^---\s?@meta\s+(.*)/,                     // Module name
+    return : /^---\s?@return\s+([^\s-]+)\s*#\s*(.*)/,   // Return value
+  },
 
   // Multiline tag
-  multilineTags: ["example"],
-  multilineStart: /^(?:--- *)?@(\w+)\s*(.*)/,
+  multilineTags : ["example"],
 
   // The actual function definition is our source of truth
-  function: /^function +\w+\s*([:\.])\s*([\w_]+)\s*\((.*?)\)$/
+  function: /^function\s+(\w+)?([:\.])?\s*([\w_]+)\s*\((.*?)\)\s*end$/,
 };
 
 module.exports = patterns;

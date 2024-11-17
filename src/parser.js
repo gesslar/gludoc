@@ -4,12 +4,17 @@ const patterns = require('./patterns');
 const Logger = require('./logger');
 
 class Func {
-  constructor() {}
-
-  name = null;
-  param = [];
-  return = null;
-  description = [];
+  constructor() {
+    this.name = null;
+    this.className = null;
+    this.param = [];
+    this.return = null;
+    this.description = [];
+    this.example = [];
+    this.meta = null;
+    this.separator = null;
+    this.contextName = null;
+  }
 }
 
 class Parser {
@@ -32,21 +37,41 @@ class Parser {
    * @param {Object} content
    */
   parse(content) {
+    const _ = this.logger;
+    const debug = _.debug.bind(_);
+    const err = _.error.bind(_);
+
     try {
       const lines = content.text.split(/\r?\n/);
       const funcs = {};
       let func = null;
+      const result = {};
 
-      lines.forEach(line => {
+      // First, let us get the module name via the meta tag, which should be the first line of the file.
+      const metaMatch = lines[0].match(patterns.tags.meta);
+      if (metaMatch) {
+        // debug("We found something that looks like a module name: " + JSON.stringify(metaMatch[1]));
+        result.meta = metaMatch[1];
+
+        // If we do not have a module name, we can't do anything with this file
+        if (!result.meta) {
+          err('No module name found');
+          return funcs;
+        }
+
+        // Remove the first line
+        lines.shift();
+      }
+
+      lines.forEach((/** @type {string} */ line) => {
         const lineTrimmed = line.trim();
 
-        // Skip empty lines unless we're processing a multiline tag, which
-        // might have them for formatting reasons.
-        if (!this.processingMultiline && !lineTrimmed.length)
-          return;
+        // Skip empty lines unless we're processing a multiline tag, which might have them for formatting reasons.
+        if (!this.processingMultiline && !lineTrimmed.length) return;
 
         // Check for start of doc comment block
         if (this.isCommentStart(lineTrimmed)) {
+          // debug('New comment block: ' + lineTrimmed);
           func = this.newFunction(lineTrimmed);
           return;
         }
@@ -69,7 +94,10 @@ class Parser {
         }
       });
 
-      return funcs;
+      result.funcs = funcs;
+
+      // this.logger.debug(`Parsed content: ${JSON.stringify(result)}`);
+      return result
     } catch (e) {
       throw e;
     }
@@ -107,10 +135,31 @@ class Parser {
   processLine(line, func) {
     const lineTrimmed = line.trim();
 
-    if (!func)
-      throw new Error('No function context');
+    if (!func) throw new Error('No function context');
 
-    const paramMatch = lineTrimmed.match(patterns.param);
+    // Match @class tag
+    const classMatch = lineTrimmed.match(patterns.tags.class);
+    if (classMatch) {
+      func.className = classMatch[1];
+      return;
+    }
+
+    // Match @meta tag
+    const metaMatch = lineTrimmed.match(patterns.tags.meta);
+    if (metaMatch) {
+      func.meta = metaMatch[1];
+      return;
+    }
+
+    // Match @name tag
+    const nameMatch = lineTrimmed.match(patterns.tags.name); // @name tag
+    if (nameMatch) {
+      func.name = nameMatch[1];
+      return;
+    }
+
+    // Match @param tag
+    const paramMatch = lineTrimmed.match(patterns.tags.param);
     if (paramMatch) {
       func.param.push({
         name: paramMatch[1],
@@ -120,8 +169,8 @@ class Parser {
       return;
     }
 
-    // Is this a return statement?
-    const returnMatch = lineTrimmed.match(patterns.return);
+    // Match @return tag
+    const returnMatch = lineTrimmed.match(patterns.tags.return);
     if (returnMatch) {
       func.return = [{
         type: returnMatch[1],
@@ -130,26 +179,20 @@ class Parser {
       return;
     }
 
-    // Is this a multiline tag?
-    const multilineMatch = lineTrimmed.match(patterns.multilineStart);
-    if (multilineMatch && patterns.multilineTags.includes(multilineMatch[1])) {
-      const tag = multilineMatch[1];
-      func[tag] = func[tag] || [];
-
-      // If there is text on the same line as the tag, add it to the tag
-      if (multilineMatch[2])
-        func[tag].push(multilineMatch[2]);
-
-      this.processingMultiline = tag;
+    // Match @example tag
+    const exampleMatch = lineTrimmed.match(patterns.tags.example);
+    if (exampleMatch) {
+      this.processingMultiline = 'example';
+      func.example.push(""); // Start new example block
       return;
     }
 
-    // If we are processing a multiline tag, add the line to the tag
-    const currentTag = this.processingMultiline;
-    if(currentTag) {
-      const tagMatch = lineTrimmed.match(patterns.multiLine);
+    // Process multiline content (for tags like @example)
+    if (this.processingMultiline) {
+      const currentTag = this.processingMultiline;
+      const tagMatch = lineTrimmed.match(patterns.docLine);
 
-      if(tagMatch && tagMatch[1]) {
+      if (tagMatch && tagMatch[1]) {
         func[currentTag].push(tagMatch[1]);
         return;
       } else {
@@ -161,7 +204,7 @@ class Parser {
     const descMatch = lineTrimmed.match(patterns.docLine);
     if (descMatch && descMatch[1]) {
       func.description.push(descMatch[1]);
-      return ;
+      return;
     } else {
       func.description.push("");
     }
@@ -171,27 +214,40 @@ class Parser {
    * @param {string} line
    */
   isFunctionDefinition(line) {
-    return line.match(patterns.function) !== null
+    return line.match(patterns.function) !== null ;
   }
 
   /**
    * @param {string} line
+   * @param {Func} func
    */
   finalizeFunction(line, func) {
     const match = line.match(patterns.function);
 
     if (match && func) {
-      const separator = match[1];
-      const functionName = match[2];
+      const contextName = match[1];  // Optional context name
+      const separator = match[2];    // Optional separator (':' or '.')
+      const functionName = match[3]; // Actual function name
 
-      func.separator = separator;
-      func.name = functionName;
+      if (!functionName) {
+        this.logger.error(`Failed to extract function name from line: ${line}`);
+        return null;
+      }
+
+      func.separator = separator || '';  // Use empty string if separator is not present
+
+      if (contextName) {
+        func.contextName = contextName;  // Store context name if available
+      }
+
+      // this.logger.debug(`Finalized function: line=${line}, name=${func.name}, context=${func.contextName}, separator=${func.separator}`);
       return functionName;
     } else {
-      this.logger.error(`Failed to finalize function: ${JSON.stringify(match)}`);
+      this.logger.error(`Failed to finalize function: ${JSON.stringify(match)}, line: ${line}`);
       return null;
     }
   }
+
 }
 
-module.exports = Parser ;
+module.exports = Parser;
