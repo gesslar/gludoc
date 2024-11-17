@@ -15,8 +15,12 @@ class Printer {
    * @param {Object} toPrint
    */
   print(toPrint) {
-    const moduleName = toPrint.name;
-    const module = toPrint.module ;
+    // this.logger.debug(`Printing module ${JSON.stringify(toPrint)}`);
+    const moduleName = toPrint.name ; // Use `meta` if `name` is not available
+    const module = toPrint.funcs;
+
+    // this.logger.debug(`Printing module ${moduleName}`);
+    // this.logger.debug(`Module content: ${JSON.stringify(module)}`);
 
     if (!toPrint) {
       this.logger.error(`No documentation found for module ${moduleName}`);
@@ -29,6 +33,7 @@ class Printer {
 
     for (const funcName of functionNames) {
       const func = module[funcName];
+      // this.logger.debug(`Printing function ${JSON.stringify(func)}`);
       output += this.generateFunctionDoc(moduleName, func);
     }
 
@@ -40,27 +45,45 @@ class Printer {
    * @param {Object} func
    */
   generateFunctionDoc(moduleName, func) {
+    const clonedFunc = JSON.parse(JSON.stringify(func));
+
+    // this.logger.debug(`Entering generateFunctionDoc with func: ${JSON.stringify(clonedFunc)}`);
+
+    if (typeof clonedFunc !== 'object' || !clonedFunc.name || !clonedFunc.separator) {
+      this.logger.error(`Unexpected input for function doc generation: ${JSON.stringify(clonedFunc)}`);
+      return "";
+    }
+
     let output = "";
 
-    // Function header with full name
-    output += this.generateFunctionName(moduleName, func);
+    if (clonedFunc.name && clonedFunc.separator) {
+      // Use the `meta` value for generating function names as well
+      // const funcName = `${moduleName}${clonedFunc.separator}${clonedFunc.name}`;
+      // output += `## ${funcName}\n\n`;
+      // output += this.generateFunctionSignature(clonedFunc);
 
-    // Description (if any)
-    output += this.generateFunctionDescription(func);
+      output += this.generateFunctionName(clonedFunc);
+    } else {
+      this.logger.error(`Invalid function or missing name/separator for function in module ${moduleName}: ${JSON.stringify(clonedFunc, null, 2)}`);
+      return "";
+    }
 
-    // Function signature in code block
-    output += this.generateFunctionSignature(moduleName, func);
+    // Get the function name and context
+
+
+    // Generate the function description, if any.
+    output += this.generateFunctionDescription(clonedFunc);
 
     // Parameters section (if any)
-    output += this.generateFunctionParameters(func);
+    output += this.generateFunctionParameters(clonedFunc);
 
     // Returns section (if any)
-    output += this.generateFunctionReturns(func);
+    output += this.generateFunctionReturns(clonedFunc);
 
     // Examples (if any)
-    output += this.generateFunctionExamples(func);
+    output += this.generateFunctionExamples(clonedFunc);
 
-    return output;
+    return output + "\n";
   }
 
   /**
@@ -100,21 +123,32 @@ class Printer {
     }
   }
 
+  // printer.js
+
   /**
-   * @param {string} moduleName
    * @param {Object} func
    */
-  generateFunctionName(moduleName, func) {
-    return `## ${moduleName}${func.separator}${func.name}\n\n`;
+  generateFunctionName(func) {
+    const context = func.contextName ? `${func.contextName}${func.separator}` : '';
+    return `## ${context}${func.name}\n\n`;
   }
 
   /**
    * @param {Object} func
-   * @param {string} moduleName
    */
-  generateFunctionSignature(moduleName, func) {
+  generateFunctionSignature(func) {
+    // this.logger.debug(`Entering generateFunctionSignature with func: ${JSON.stringify(func)}`);
+    if (!func.name) {
+      this.logger.error(`Function name is missing for ${func.contextName || 'unknown context'}`);
+      return '';
+    }
+
+    const context = func.contextName ? `${func.contextName}${func.separator}` : '';
+    const functionName = func.name || 'unknown';
+    const params = this.getParamList(func.param);
+
     return "```lua\n" +
-      `${moduleName}${func.separator}${func.name}(${this.getParamList(func.param)})\n` +
+      `${context}${functionName}(${params})\n` +
       "```\n\n";
   }
 
@@ -129,7 +163,7 @@ class Printer {
    * @param {Object} func
    */
   generateFunctionParameters(func) {
-    const f = param => `- \`${param.name}\` (\`${param.type}\`) - ${param.description}\n`;
+    const f = param => `- \`${param.name}\` (\`${param.type}\`) - ${param.description}`;
 
     return this.generateDocBlock(func, "param", "Parameters", f);
   }
@@ -157,6 +191,7 @@ class Printer {
    * @param {function} f
    */
   generateDocBlock(func, property, label = null, f = null) {
+    const debug = this.logger.debug.bind(this.logger);
     if (!func[property])
       return "";
 
@@ -170,11 +205,18 @@ class Printer {
           : "";
     }
 
-    const value = render(func[property], f);
+    let value = render(func[property], f);
+    if(value.length < 1) return "";
 
-    return value.length > 0
-      ? `${label ? `**${label}**\n\n` : ""}${value}\n\n`
-      : "";
+    let result = "" ;
+    result += label ? `\n**${label}**\n\n` : "";
+
+    value = value.replace(/\n$/, '') ;
+    value = value.replace(/^\n/, '') ;
+
+    result += value ;
+
+    return result + "\n" ;
   }
 }
 
