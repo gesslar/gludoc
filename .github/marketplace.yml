@@ -1,0 +1,31 @@
+name: Publish VS Code Extension
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Run when a version tag (e.g., v1.0.0) is pushed
+  workflow_dispatch:  # Allow manual triggering of the workflow
+
+jobs:
+  publish-extension:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install vsce
+        run: npm install -g vsce
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Publish VS Code Extension
+        env:
+          VSCODE_MARKETPLACE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}
+        run: vsce publish --pat $VSCODE_MARKETPLACE_PAT
