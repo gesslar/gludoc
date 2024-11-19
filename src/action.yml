@@ -1,0 +1,10 @@
+# File: action.yml
+name: 'LuaDoc'
+description: 'A GitHub Action to generate markdown documentation from Lua files'
+inputs:
+  filepath:
+    description: 'Path to the Lua file to document'
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/action.js'

@@ -1,17 +1,15 @@
 // reader.js
 const fs = require('fs/promises');
-const Logger = require('./logger');
 
 /**
  * @class Reader
  */
 class Reader {
   /**
-   * @param {string} owner
+   * @param {Object} core
    */
-  constructor(owner) {
-    this.owner = owner;
-    this.logger = new Logger(owner);
+  constructor(core) {
+    this.core = core ;
   }
 
   /**
