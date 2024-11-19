@@ -19,12 +19,11 @@ class Func {
 
 class Parser {
   /**
-   * @param {string} owner
+   * @param {Object} core
    */
-  constructor(owner) {
+  constructor(core) {
     this._resetState();
-    this.owner = owner;
-    this.logger = new Logger(owner);
+    this.core = core ;
     this.processingMultiline = null;
   }
 
@@ -37,12 +36,8 @@ class Parser {
    * @param {Object} content
    */
   parse(content) {
-    const _ = this.logger;
-    const debug = _.debug.bind(_);
-    const err = _.error.bind(_);
-
     try {
-      const lines = content.text.split(/\r?\n/);
+      const lines = content.split(/\r?\n/);
       const funcs = {};
       let func = null;
       const result = {};
@@ -55,7 +50,7 @@ class Parser {
 
         // If we do not have a module name, we can't do anything with this file
         if (!result.meta) {
-          err('No module name found');
+          this.core.logger.error('No module name found');
           return funcs;
         }
 
@@ -96,7 +91,6 @@ class Parser {
 
       result.funcs = funcs;
 
-      // this.logger.debug(`Parsed content: ${JSON.stringify(result)}`);
       return result
     } catch (e) {
       throw e;
@@ -234,7 +228,7 @@ class Parser {
       const functionName = match[3]; // Actual function name
 
       if (!functionName) {
-        this.logger.error(`Failed to extract function name from line: ${line}`);
+        this.core.logger.error(`Failed to extract function name from line: ${line}`);
         return null;
       }
 
@@ -244,10 +238,9 @@ class Parser {
         func.contextName = contextName;  // Store context name if available
       }
 
-      // this.logger.debug(`Finalized function: line=${line}, name=${func.name}, context=${func.contextName}, separator=${func.separator}`);
       return functionName;
     } else {
-      this.logger.error(`Failed to finalize function: ${JSON.stringify(match)}, line: ${line}`);
+      this.core.logger.error(`Failed to finalize function: ${JSON.stringify(match)}, line: ${line}`);
       return null;
     }
   }

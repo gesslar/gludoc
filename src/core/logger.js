@@ -7,10 +7,11 @@ const info = vscode.window.showInformationMessage;
 
 class Logger {
   /**
-   * @param {string} name
+   * @param {Object} core
    */
-  constructor(name) {
-    this.name = name;
+  constructor(core) {
+    this.core = core ;
+    this.name = core.config.owner ;
   }
 
   /**

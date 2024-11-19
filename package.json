@@ -3,7 +3,7 @@
   "displayName": "Gludoc",
   "description": "Generates documentation from Lua comments",
   "icon": "assets/folder.png",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "publisher": "gesslar",
   "license": "IDGAF",
   "author": {
@@ -24,12 +24,12 @@
   "activationEvents": [
     "onLanguage:lua"
   ],
-  "main": "./src/extension.js",
+  "main": "./src/vscode/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "vscode-gludoc.generateDocs",
-        "title"  : "Gludoc: Generate Lua Documentation from current workspace"
+        "title": "Gludoc: Generate Lua Documentation from current workspace"
       }
     ],
     "configuration": {
@@ -64,11 +64,15 @@
     }
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build:vscode": "vsce package",
+    "build:action": "ncc build src/github_action/action.js -o dist"
   },
   "devDependencies": {
-    "@types/vscode": "^1.80.0",
     "@types/node": "^16.0.0",
-    "eslint": "^8.47.0"
+    "@types/vscode": "^1.80.0",
+    "eslint": "^8.47.0",
+    "@actions/core": "^1.2.6",
+    "@vercel/ncc": "^0.27.0"
   }
 }

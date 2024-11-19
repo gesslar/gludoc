@@ -1,26 +1,21 @@
 const fs = require("fs").promises;
 const path = require("path");
-const Logger = require("./logger");
 
 class Printer {
   /**
-   * @param {Object} config
+   * @param {Object} core
    */
-  constructor(config) {
-    this.config = config;
-    this.logger = new Logger(config.owner);
+  constructor(core) {
+    this.core = core ;
+    this.logger = core.logger ;
   }
 
   /**
    * @param {Object} toPrint
    */
   print(toPrint) {
-    // this.logger.debug(`Printing module ${JSON.stringify(toPrint)}`);
-    const moduleName = toPrint.name ; // Use `meta` if `name` is not available
+    const moduleName = toPrint.meta ; // Use `meta` if `name` is not available
     const module = toPrint.funcs;
-
-    // this.logger.debug(`Printing module ${moduleName}`);
-    // this.logger.debug(`Module content: ${JSON.stringify(module)}`);
 
     if (!toPrint) {
       this.logger.error(`No documentation found for module ${moduleName}`);
@@ -33,7 +28,6 @@ class Printer {
 
     for (const funcName of functionNames) {
       const func = module[funcName];
-      // this.logger.debug(`Printing function ${JSON.stringify(func)}`);
       output += this.generateFunctionDoc(moduleName, func);
     }
 
@@ -47,8 +41,6 @@ class Printer {
   generateFunctionDoc(moduleName, func) {
     const clonedFunc = JSON.parse(JSON.stringify(func));
 
-    // this.logger.debug(`Entering generateFunctionDoc with func: ${JSON.stringify(clonedFunc)}`);
-
     if (typeof clonedFunc !== 'object' || !clonedFunc.name || !clonedFunc.separator) {
       this.logger.error(`Unexpected input for function doc generation: ${JSON.stringify(clonedFunc)}`);
       return "";
@@ -57,18 +49,11 @@ class Printer {
     let output = "";
 
     if (clonedFunc.name && clonedFunc.separator) {
-      // Use the `meta` value for generating function names as well
-      // const funcName = `${moduleName}${clonedFunc.separator}${clonedFunc.name}`;
-      // output += `## ${funcName}\n\n`;
-      // output += this.generateFunctionSignature(clonedFunc);
-
       output += this.generateFunctionName(clonedFunc);
     } else {
       this.logger.error(`Invalid function or missing name/separator for function in module ${moduleName}: ${JSON.stringify(clonedFunc, null, 2)}`);
       return "";
     }
-
-    // Get the function name and context
 
 
     // Generate the function description, if any.
@@ -98,13 +83,15 @@ class Printer {
 
   // Helper method to write the markdown file
   /**
-   * @param {string} outputPath
-   * @param {string} doc
+   * @param {Object} parsed
    */
-  async writeMarkdown(outputPath, doc) {
+  async writeMarkdown(parsed) {
+    const outputDir = this.core.config.distRoot
+    const outputPath = `${outputDir}/${parsed.meta}.md`;
+
     try {
       await this.assureDirectory();
-      await fs.writeFile(outputPath, doc, "utf8");
+      await fs.writeFile(outputPath, parsed.markdown, "utf8");
       return true;
     } catch (e) {
       this.logger.error(`Error writing markdown for \`${outputPath}\`: ${e.stack}`);
@@ -115,8 +102,8 @@ class Printer {
   async assureDirectory() {
     try {
       // Just create the directory and write the file, regardless of whether it"s in a submodule
-      const outputPath = path.resolve(this.config.workspaceRoot, this.config.outputPath);
-      await fs.mkdir(outputPath, { recursive: true });
+      const outputDir = `${this.core.config.distRoot}/`;
+      await fs.mkdir(outputDir, { recursive: true });
     } catch (e) {
       this.logger.error(`Error creating output directory: ${e.stack}`);
       throw e;
@@ -137,7 +124,6 @@ class Printer {
    * @param {Object} func
    */
   generateFunctionSignature(func) {
-    // this.logger.debug(`Entering generateFunctionSignature with func: ${JSON.stringify(func)}`);
     if (!func.name) {
       this.logger.error(`Function name is missing for ${func.contextName || 'unknown context'}`);
       return '';
@@ -191,7 +177,6 @@ class Printer {
    * @param {function} f
    */
   generateDocBlock(func, property, label = null, f = null) {
-    const debug = this.logger.debug.bind(this.logger);
     if (!func[property])
       return "";
 
