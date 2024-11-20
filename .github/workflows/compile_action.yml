@@ -1,4 +1,4 @@
-name: Build and Prepare GitHub Action
+name: Build and Release Action
 
 on:
   push:
@@ -11,12 +11,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '20'
@@ -24,13 +23,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build action using ncc
-        run: ncc build src/cli/cli.js -o dist
+      # Bundle the CLI to be used as the GitHub Action
+      - name: Compile action using ncc
+        run: npx @vercel/ncc build src/cli/cli.js -o dist
 
-      - name: Commit build output
+      # Push the changes to dist/ back to the repository
+      - name: Commit built action
         run: |
-          git config --local user.name "GitHub Actions"
-          git config --local user.email "<>"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add dist/
-          git commit -m "Build GitHub Action"
-          git push
+          git commit -m "Build action for release"
+          git tag -f ${{ github.ref_name }}
+          git push --tags origin HEAD
