@@ -25,5 +25,5 @@ jobs:
 
       - uses: actions/upload-artifact@master
         with:
-          name: dist
+          name: cli
           path: dist/
