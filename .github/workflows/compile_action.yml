@@ -21,7 +21,13 @@ jobs:
           node-version: 20
 
       - name: Install NCC
-        run: npm install -g ncc && npm install && npm run build:action
+        run: npm install -g @vercel/ncc
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build:action
 
       - name: Publish GitHub Action
         run: git push origin main
