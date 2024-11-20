@@ -27,6 +27,14 @@ jobs:
       - name: Build
         run: npm run build:action
 
+      - name: Validate that there is a difference
+        run: |
+          lines_changed=$(git diff --patch --unified=0 dist/index.js | wc --lines)
+          if [ "$lines_changed" -eq 0 ]; then
+            echo "No changes to the compiled action file"
+            exit 1
+          fi
+
       - name: Publish GitHub Action
         run: |
           git config --global user.email "action@github.com"
