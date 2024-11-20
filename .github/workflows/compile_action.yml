@@ -32,7 +32,7 @@ jobs:
           lines_changed=$(git diff --patch --unified=0 dist/index.js | wc --lines)
           if [ "$lines_changed" -eq 0 ]; then
             echo "No changes to the compiled action file"
-            exit 1
+            exit 0
           fi
 
       - name: Publish GitHub Action
