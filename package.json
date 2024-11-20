@@ -3,7 +3,7 @@
   "displayName": "Gludoc",
   "description": "Generates documentation from Lua comments",
   "icon": "assets/folder.png",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "publisher": "gesslar",
   "license": "IDGAF",
   "author": {
@@ -66,11 +66,11 @@
   "scripts": {
     "lint": "eslint .",
     "build:vscode": "vsce package",
-    "build:action": "ncc build src/cli/cli.js -o dist",
+    "build:action": "ncc build src/action/action.js -o dist",
     "cli": "node src/cli/cli.js"
   },
   "devDependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.11.1",
     "@types/node": "^16.0.0",
     "@types/vscode": "^1.80.0",
     "eslint": "^8.47.0"
