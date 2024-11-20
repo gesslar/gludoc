@@ -31,3 +31,9 @@ jobs:
 
       - name: Publish GitHub Action
         run: git add dist && git commit -m "Update dist" && git push origin main
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
