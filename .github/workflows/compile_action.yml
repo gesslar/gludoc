@@ -13,17 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@lastest
 
       - name: Compile action with NCC
-        uses: tool3/ncc@master
+        uses: tool3/ncc@latest
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           src: 'src/cli/cli.js'
           branch: 'main'
           commit_msg: 'Compile action with NCC'
 
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@latest
         with:
           name: dist
           path: dist/
