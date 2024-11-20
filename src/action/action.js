@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const { Gludoc, Environment } = require('../core/core')
 const fs = require('fs');
-
+const path = require('path');
 async function run() {
   try {
 
@@ -29,13 +29,25 @@ async function run() {
     const destination = core.getInput('destination');
     const debug = core.getInput('debug');
 
-    const config = {
-      owner: "gludoc",
-      env: Environment.ACTION,
+    const passed = {
       source,
       destination,
       debug,
     }
+
+    const config = {
+      ...{
+        owner: "gludoc",
+        env: Environment.ACTION,
+        source: "./",
+        destination: "dist/",
+        debug: false,
+      },
+      ...passed
+    }
+
+    config.source = path.resolve(config.source);
+    config.destination = path.resolve(config.destination);
 
     const gludoc = new Gludoc(config);
     const files = findFiles(config.source);

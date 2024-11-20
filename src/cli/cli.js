@@ -1,5 +1,6 @@
 const {Gludoc, Environment} = require('../core/core')
 const fs = require('fs');
+const path = require('path');
 const yargs = require('yargs');
 
 const argv = yargs
@@ -36,6 +37,9 @@ const argv = yargs
     },
     ...argv
     }
+
+    config.source = path.resolve(config.source);
+    config.destination = path.resolve(config.destination);
 
     const gludoc = new Gludoc(config);
 
