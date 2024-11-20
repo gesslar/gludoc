@@ -13,26 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Compile action with NCC
+        uses: tool3/ncc@master
         with:
-          node-version: '20'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          src: 'src/cli/cli.js'
+          branch: 'main'
+          commit_msg: 'Compile action with NCC'
 
-      - name: Install dependencies
-        run: npm install
-
-      # Bundle the CLI to be used as the GitHub Action
-      - name: Compile action using ncc
-        run: npx @vercel/ncc build src/cli/cli.js -o dist
-
-      # Push the changes to dist/ back to the repository
-      - name: Commit built action
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dist/
-          git commit -m "Build action for release"
-          git tag -f ${{ github.ref_name }}
-          git push --tags origin HEAD
+      - uses: actions/upload-artifact@v1    <-- optional (upload dist directory)
+        with:
+          name: dist
+          path: dist/
