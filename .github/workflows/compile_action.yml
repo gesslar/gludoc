@@ -1,0 +1,36 @@
+name: Build and Prepare GitHub Action
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build action using ncc
+        run: ncc build src/cli/cli.js -o dist
+
+      - name: Commit build output
+        run: |
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "<>"
+          git add dist/
+          git commit -m "Build GitHub Action"
+          git push

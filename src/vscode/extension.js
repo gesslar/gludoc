@@ -21,8 +21,9 @@ async function activate(context) {
         const config = {
           owner: "gludoc",
           env: Environment.EXTENSION,
-          sourceRoot: "./library/",
-          distRoot: `${workspaceRoot}/dist/`,
+          source: "./library/",
+          destination: `${workspaceRoot}/dist/`,
+          debug: false,
         }
         const gludoc = new Gludoc(config);
         const searchPattern = "**/*.lua";

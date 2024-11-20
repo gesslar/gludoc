@@ -86,7 +86,7 @@ class Printer {
    * @param {Object} parsed
    */
   async writeMarkdown(parsed) {
-    const outputDir = this.core.config.distRoot
+    const outputDir = this.core.config.destination
     const outputPath = `${outputDir}/${parsed.meta}.md`;
 
     try {
@@ -102,7 +102,7 @@ class Printer {
   async assureDirectory() {
     try {
       // Just create the directory and write the file, regardless of whether it"s in a submodule
-      const outputDir = `${this.core.config.distRoot}/`;
+      const outputDir = `${this.core.config.destination}/`;
       await fs.mkdir(outputDir, { recursive: true });
     } catch (e) {
       this.logger.error(`Error creating output directory: ${e.stack}`);

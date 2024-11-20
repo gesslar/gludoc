@@ -66,13 +66,17 @@
   "scripts": {
     "lint": "eslint .",
     "build:vscode": "vsce package",
-    "build:action": "ncc build src/github_action/action.js -o dist"
+    "build:action": "ncc build src/github_action/action.js -o dist",
+    "cli" : "node src/cli/cli"
   },
   "devDependencies": {
+    "@actions/core": "^1.2.6",
     "@types/node": "^16.0.0",
     "@types/vscode": "^1.80.0",
-    "eslint": "^8.47.0",
-    "@actions/core": "^1.2.6",
-    "@vercel/ncc": "^0.27.0"
+    "@vercel/ncc": "^0.27.0",
+    "eslint": "^8.47.0"
+  },
+  "dependencies": {
+    "yargs": "^17.7.2"
   }
 }

@@ -1,9 +1,6 @@
 // logger.js
 
-const vscode = require('vscode');
-
-const error = vscode.window.showErrorMessage;
-const info = vscode.window.showInformationMessage;
+const {Configuration, Environment} = require("./env")
 
 class Logger {
   /**
@@ -12,6 +9,13 @@ class Logger {
   constructor(core) {
     this.core = core ;
     this.name = core.config.owner ;
+
+    if(core.config.env === Environment.EXTENSION) {
+      const vscode = require('vscode');
+      this.vscodeError = vscode.window.showErrorMessage.bind(vscode.window);
+      this.vscodeWarn = vscode.window.showWarningMessage.bind(vscode.window);
+      this.vscodeInfo = vscode.window.showInformationMessage.bind(vscode.window);
+    }
   }
 
   /**
@@ -21,12 +25,17 @@ class Logger {
     console.debug(`[${this.name}] debug:`, message);
   }
 
+  warn(message) {
+    console.warn(`[${this.name}] warn:`, message);
+    this.vscodeWarn && this.vscodeWarn(message);
+  }
+
   /**
    * @param {string} message
    */
   info(message) {
     console.info(`[${this.name}] info:`, message);
-    info(message);
+    this.vscodeInfo && this.vscodeInfo(message);
   }
 
   /**
@@ -34,7 +43,7 @@ class Logger {
    */
   error(message) {
     console.error(`[${this.name}] error:`, message);
-    error(message);
+    this.vscodeError && this.vscodeError(message);
   }
 }
 

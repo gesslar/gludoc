@@ -30,7 +30,7 @@ class Gludoc {
     this.parser = new Parser(this)
     this.printer = new Printer(this)
 
-    this.config.outputPath = this.config.distRoot
+    this.config.outputPath = this.config.destination
   }
 
   /**

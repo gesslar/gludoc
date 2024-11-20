@@ -1,0 +1,16 @@
+name: 'Gludoc'
+description: 'A GitHub Action to generate markdown documentation from Lua files'
+inputs:
+  source:
+    description: 'Path to the Lua file to document'
+    required: false
+  destination:
+    description: 'Path to the markdown file to generate'
+    required: true
+  debug:
+    description: 'Enable debug mode'
+    required: false
+    default: "false"
+runs:
+  using: 'node20'
+  main: 'dist/action.js'

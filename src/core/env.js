@@ -9,10 +9,10 @@ const Configuration = {
   default: {
     environment: Environment.EXTENSION,
     name: "gludoc",
-    sourceRoot: "src",
-    distRoot: "dist",
+    source: "src",
+    destination: "dist",
   },
-  required: ["owner", "env", "sourceRoot", "distRoot"]
+  required: ["owner", "env", "source", "destination"]
 }
 
 module.exports = {
