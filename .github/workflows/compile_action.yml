@@ -23,7 +23,7 @@ jobs:
           branch: 'main'
           commit_msg: 'Compile action with NCC'
 
-      - uses: actions/upload-artifact@v1    <-- optional (upload dist directory)
+      - uses: actions/upload-artifact@v1
         with:
           name: dist
           path: dist/
