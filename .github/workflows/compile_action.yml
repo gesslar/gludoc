@@ -15,14 +15,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@master
 
-      - name: Compile action with NCC
-        uses: tool3/ncc@master
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          src: 'src/cli/cli.js'
-          branch: 'main'
-          commit_msg: 'Compile action with NCC'
+          node-version: 20
 
-      - uses: actions/upload-artifact@master
+      - name: Install NCC
+        run: npm install -g ncc
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build:action
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@master
         with:
           path: dist/

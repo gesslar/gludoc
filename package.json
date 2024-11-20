@@ -66,8 +66,8 @@
   "scripts": {
     "lint": "eslint .",
     "build:vscode": "vsce package",
-    "build:action": "ncc build src/github_action/action.js -o dist",
-    "cli": "node src/cli/cli"
+    "build:action": "ncc build src/cli/cli.js -o dist",
+    "cli": "node src/cli/cli.js"
   },
   "devDependencies": {
     "@actions/core": "^1.2.6",
