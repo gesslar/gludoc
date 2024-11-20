@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@lastest
+        uses: actions/checkout@v2
 
       - name: Compile action with NCC
         uses: tool3/ncc@latest
