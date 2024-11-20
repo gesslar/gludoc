@@ -30,4 +30,4 @@ jobs:
         run: npm run build:action
 
       - name: Publish GitHub Action
-        run: git push origin main
+        run: git add dist && git commit -m "Update dist" && git push origin main
