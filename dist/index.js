@@ -28299,7 +28299,7 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(6026);
 const { Gludoc, Environment } = __nccwpck_require__(4492)
 const fs = __nccwpck_require__(9896);
-
+const path = __nccwpck_require__(6928);
 async function run() {
   try {
 
@@ -28327,13 +28327,25 @@ async function run() {
     const destination = core.getInput('destination');
     const debug = core.getInput('debug');
 
-    const config = {
-      owner: "gludoc",
-      env: Environment.ACTION,
+    const passed = {
       source,
       destination,
       debug,
     }
+
+    const config = {
+      ...{
+        owner: "gludoc",
+        env: Environment.ACTION,
+        source: "./",
+        destination: "dist/",
+        debug: false,
+      },
+      ...passed
+    }
+
+    config.source = path.resolve(config.source);
+    config.destination = path.resolve(config.destination);
 
     const gludoc = new Gludoc(config);
     const files = findFiles(config.source);
