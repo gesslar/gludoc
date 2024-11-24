@@ -15,22 +15,22 @@ jobs:
       - name: Read latest tag
         id: latest_tag
         run: |
-          echo "latest_tag=$(git describe --tags --abbrev=0 || echo 'none')" >> $GITHUB_ENV
+          echo "latest_tag=$(git describe --tags --abbrev=0 || echo 'none')" >> $GITHUB_OUTPUT
 
       - name: Read version from package.json
         id: version
         run: |
-          echo "version=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
+          echo "version=$(cat package.json | jq -r .version)" >> $GITHUB_OUTPUT
 
       - name: Generate new tag if needed
-        if: env.version != env.latest_tag
+        if: steps.version.outputs.version != steps.latest_tag.outputs.latest_tag
         run: |
-          new_tag="v${{ env.version }}"
+          new_tag="v${steps.version.outputs.version}"
           echo "Generating new tag: $new_tag"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag $new_tag
           git push origin $new_tag
         env:
-          version: ${{ env.version }}
-          latest_tag: ${{ env.latest_tag }}
+          version: ${{ steps.version.outputs.version }}
+          latest_tag: ${{ steps.latest_tag.outputs.latest_tag }}
