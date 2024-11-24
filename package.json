@@ -3,7 +3,7 @@
   "displayName": "Gludoc",
   "description": "Generates documentation from Lua comments",
   "icon": "assets/folder.png",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "publisher": "gesslar",
   "license": "IDGAF",
   "author": {
