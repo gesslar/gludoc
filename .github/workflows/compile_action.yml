@@ -24,13 +24,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Remove old index.js
+        run: rm -f gludoc/index.js
+
       - name: Build
         run: npm run build:action
 
       - name: Check for changes in dist
         id: changes_check
         run: |
-          lines_changed=$(git diff --patch --unified=0 dist/index.js | wc --lines)
+          lines_changed=$(git diff --patch --unified=0 gludoc/index.js | wc --lines)
           echo "has_changes=$lines_changed" >> $GITHUB_ENV
 
       - name: Publish GitHub Action
@@ -38,6 +41,6 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add dist &&
+          git add gludoc &&
           git commit -m "Auto-build GitHub Action" &&
           git push origin main
