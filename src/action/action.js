@@ -40,7 +40,7 @@ async function run() {
         owner: "gludoc",
         env: Environment.ACTION,
         source: "./",
-        destination: "dist/",
+        destination: "gludoc/",
         debug: false,
       },
       ...passed

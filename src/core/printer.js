@@ -1,5 +1,4 @@
 const fs = require("fs").promises;
-const path = require("path");
 
 class Printer {
   /**
@@ -42,8 +41,13 @@ class Printer {
     const clonedFunc = JSON.parse(JSON.stringify(func));
 
     if (typeof clonedFunc !== 'object' || !clonedFunc.name || !clonedFunc.separator) {
-      this.logger.error(`Unexpected input for function doc generation: ${JSON.stringify(clonedFunc)}`);
-      return "";
+      let reason
+
+      if (!clonedFunc) reason = "missing function" ;
+      if (!clonedFunc.name) reason = "missing name" ;
+      if (!clonedFunc.separator) reason = "missing separator" ;
+
+      throw new Error(`Unexpected input for function doc generation: ${reason}\n${JSON.stringify(clonedFunc)}`);
     }
 
     let output = "";

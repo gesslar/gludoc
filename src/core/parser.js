@@ -1,7 +1,6 @@
 // parser.js
 
 const patterns = require('./patterns');
-const Logger = require('./logger');
 
 class Func {
   constructor() {
