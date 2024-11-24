@@ -34,17 +34,17 @@ jobs:
       - name: Build
         run: npm run build:action
 
-      - name: Check for changes in dist
+      - name: Check for changes in gludoc
         id: changes_check
         run: |
           lines_changed=$(git diff --patch --unified=0 gludoc/index.js | wc --lines)
-          echo "has_changes=$lines_changed" >> $GITHUB_ENV
+          echo "has_changes=$lines_changed" >> $GITHUB_OUTPUT
 
       - name: Publish GitHub Action
-        if: env.has_changes != '0'
+        if: steps.changes_check.outputs.has_changes != '0'
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add gludoc &&
+          git add gludoc -f
           git commit -m "Auto-build GitHub Action" &&
           git push origin main
