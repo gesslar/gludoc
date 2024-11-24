@@ -1,6 +1,10 @@
 name: Build and Release Action
 
 on:
+  workflow_run:
+    workflows: ['Publish VS Code Extension']
+    types:
+      - completed
   push:
     tags:
       - v*
