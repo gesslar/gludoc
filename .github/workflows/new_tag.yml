@@ -56,7 +56,6 @@ jobs:
 
       - name: Trigger ${{ matrix.workflow }}
         run: |
-          git tag | tail
-          gh workflow run ${{ matrix.workflow }} --ref $tag
+          gh workflow run ${{ matrix.workflow }} --ref ${{ needs.generate-tag.outputs.version }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
