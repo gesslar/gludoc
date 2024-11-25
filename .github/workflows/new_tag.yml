@@ -51,6 +51,9 @@ jobs:
       matrix:
         workflow: [marketplace.yml, compile_action.yml] # Array of workflows to trigger
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Ensures .git exists for gh CLI
+
       - name: Trigger ${{ matrix.workflow }}
         run: |
           gh workflow run ${{ matrix.workflow }} --ref ${{ needs.generate-tag.outputs.version }}
