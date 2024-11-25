@@ -36,7 +36,7 @@ jobs:
       - name: Generate new tag if needed
         if: steps.version.outputs.version != steps.latest_tag.outputs.latest_tag
         run: |
-          new_tag="${version}"
+          new_tag="${steps.version.outputs.version}"
           echo "Generating new tag: $new_tag"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
