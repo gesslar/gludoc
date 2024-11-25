@@ -46,6 +46,7 @@ jobs:
   trigger-workflows:
     runs-on: ubuntu-latest
     needs: generate-tag
+    if: needs.generate-tag.outputs.version != needs.generate-tag.outputs.latest_tag
     strategy:
       matrix:
         workflow: [marketplace.yml, compile_action.yml] # Array of workflows to trigger
