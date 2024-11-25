@@ -34,7 +34,7 @@ jobs:
       - name: Check for changes in gludoc
         id: changes_check
         run: |
-          lines_changed=$(git diff --patch --unified=0 gludoc/index.js | wc --lines)
+          lines_changed=$(git status -s | wc --lines)
           echo "has_changes=$lines_changed" >> $GITHUB_OUTPUT
 
       - name: Publish GitHub Action
