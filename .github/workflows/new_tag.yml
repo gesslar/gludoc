@@ -9,8 +9,7 @@ jobs:
   generate-tag:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ github.token }}
-
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,7 +39,19 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag $new_tag
           git push origin $new_tag
-          gh workflow run marketplace.yml --ref $new_tag
         env:
           version: ${{ steps.version.outputs.version }}
           latest_tag: ${{ steps.latest_tag.outputs.latest_tag }}
+
+  trigger-workflows:
+    needs: generate-tag
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workflow: [marketplace.yml, compile_action.yml] # Array of workflows to trigger
+    steps:
+      - name: Trigger ${{ matrix.workflow }}
+        run: |
+          gh workflow run ${{ matrix.workflow }} --ref ${{ needs.generate-tag.outputs.new_tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
