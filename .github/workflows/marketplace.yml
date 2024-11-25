@@ -8,6 +8,7 @@ on:
 
 jobs:
   publish-extension:
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
