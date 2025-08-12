@@ -14,7 +14,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -51,7 +51,7 @@ jobs:
         workflow: [marketplace.yml, compile_action.yml] # Array of workflows to trigger
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Ensures .git exists for gh CLI
+        uses: actions/checkout@v5 # Ensures .git exists for gh CLI
 
       - name: Trigger ${{ matrix.workflow }}
         run: |
